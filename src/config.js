@@ -1,7 +1,7 @@
 import { config } from 'dotenv'
 config();
 
-export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+export const FRONTEND_URL = process.env.FRONTEND_URL || 'https://backend-gestion-menus.onrender.com/';
 
 export default {
     //secretKey: process.env.SECRET_KEY || '',
