@@ -131,7 +131,8 @@ export const querysMenuInstancias = {
         SELECT b.*, p.nombre as producto
         FROM bitacora b
         JOIN producto p ON b.producto_id = p.id
-        WHERE b.instancia_id = $1`,
+        WHERE b.instancia_id = $1
+        ORDER BY b.fecha_hora ASC;`,
     postBitacora: `
         INSERT INTO bitacora (instancia_id, producto_id, cantidad_retirada)
         VALUES ($1, $2, $3)
@@ -148,15 +149,6 @@ export const querysMenuInstancias = {
         FROM menu m
         LEFT JOIN menu_instancia mi ON m.id = mi.menu_id
         GROUP BY m.id`,
-        
-    getInventarioGlobal: `
-        SELECT p.id, p.nombre, 
-               SUM(ii.cantidad_actual) as stock,
-               p.precio_global as precio
-        FROM producto p
-        LEFT JOIN instancia_inventario ii ON p.id = ii.producto_id
-        GROUP BY p.id`,
-        
     getHistorialMenu: `
         SELECT mi.id as instancia_id, m.nombre, mi.version,
                b.fecha_hora, b.mensaje
@@ -164,4 +156,16 @@ export const querysMenuInstancias = {
         JOIN menu m ON mi.menu_id = m.id
         LEFT JOIN bitacora b ON mi.id = b.instancia_id
         WHERE mi.menu_id = $1`
+  };
+
+  export const querysUsuario = {
+    createUsuario: `
+      INSERT INTO usuario (nombre, usuario, contraseña) 
+      VALUES ($1, $2, $3) 
+      RETURNING *;
+    `,
+    getUsuarioByUsername: `
+      SELECT * FROM usuario 
+      WHERE usuario = $1;
+    `
   };
