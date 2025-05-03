@@ -18,11 +18,10 @@ const app = express();
 
 // Construye la lista de orígenes permitidos
 const allowedOrigins = [
-  process.env.FRONTEND_URL,       // p.ej. "https://tuproduccion.com"
-  process.env.FRONTEND_PROD_URL   // p.ej. "https://tuproduccion.com"
-]
-  .filter(Boolean);
-
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_PROD_URL,
+  'http://localhost:3000' // <-- Asegúrate de que esté presente
+].filter(Boolean);
 // Durante el desarrollo, añade localhost:3000
 if (process.env.NODE_ENV !== 'production') {
   allowedOrigins.push('http://localhost:3000');
@@ -32,17 +31,11 @@ console.log('➜  CORS allowed origins:', allowedOrigins);
 
 // Middleware CORS
 app.use(cors({
-  origin: (origin, callback) => {
-    // Si no hay origin (Postman, mobile clients, etc) o está en la lista, OK
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    // Si no, error de CORS
-    callback(new Error(`Origen no permitido por CORS: ${origin}`));
-  },
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  credentials: true
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // <-- Permite cookies
+  exposedHeaders: ['Authorization'] // <-- Opcional, si usas JWT
 }));
 
 // Para manejar el preflight (OPTIONS) en todas las rutas
