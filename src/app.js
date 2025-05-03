@@ -31,11 +31,21 @@ console.log('➜  CORS allowed origins:', allowedOrigins);
 
 // Middleware CORS
 app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:3000', // Añade explícitamente tu origen local
+      // ... otros orígenes permitidos
+    ];
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Origen no permitido"));
+    }
+  },
+  credentials: true, // Acepta cookies/autorización
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // <-- Permite cookies
-  exposedHeaders: ['Authorization'] // <-- Opcional, si usas JWT
 }));
 
 // Para manejar el preflight (OPTIONS) en todas las rutas
