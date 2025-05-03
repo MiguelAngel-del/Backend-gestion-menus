@@ -1,5 +1,34 @@
 import { getConnection, querysProductos } from "../database/index.js";
 
+
+// busacar producto por nombre
+// --------------------- GET: Buscar Productos por Nombre ---------------------
+export const searchProductos = async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q) {
+        return res.status(400).json({ msg: "Parámetro de búsqueda 'q' requerido." });
+      }
+  
+      const connection = await getConnection();
+      const result = await connection.query(querysProductos.searchProductos, [q]);
+      connection.release();
+      //ver desde consula la catidad de veces que se usa
+      console.log("Cantidad de veces que se usa la consulta: ", result.rowCount);
+      //console.log(result.rows);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).json({ msg: "No se encontraron productos con ese término." });
+      }
+  
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error in searchProductos:", error);
+      res.status(500).send("Error buscando productos.");
+    }
+  };
+  
+
 // --------------------- GET: Obtener Todos los Productos ---------------------
 export const getProductos = async (req, res) => {
     try {
@@ -35,15 +64,15 @@ export const getProductoById = async (req, res) => {
 // --------------------- POST: Crear Nuevo Producto ---------------------
 export const createProducto = async (req, res) => {
     try {
-        const { nombre, precio_global } = req.body;
+        const { nombre, precio_global, tipo } = req.body;
 
         // Validaciones básicas
-        if (!nombre || !precio_global) {
+        if (!nombre || !precio_global|| !tipo) {
             return res.status(400).json({ msg: "Faltan datos requeridos: nombre y precio_global." });
         }
 
         const connection = await getConnection();
-        const result = await connection.query(querysProductos.postProducto, [nombre, precio_global]);
+        const result = await connection.query(querysProductos.postProducto, [nombre, precio_global, tipo]);
         connection.release();
         res.status(201).json(result.rows[0]); // Devuelve el producto creado
     } catch (error) {
@@ -56,14 +85,14 @@ export const createProducto = async (req, res) => {
 export const updateProducto = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, precio_global } = req.body;
+        const { nombre, precio_global, tipo } = req.body;
 
-        if (!nombre || !precio_global) {
+        if (!nombre || !precio_global || !tipo) {
             return res.status(400).json({ msg: "Faltan datos requeridos: nombre y precio_global." });
         }
 
         const connection = await getConnection();
-        const result = await connection.query(querysProductos.putProducto, [nombre, precio_global, id]);
+        const result = await connection.query(querysProductos.putProducto, [nombre, precio_global, tipo, id]);
         connection.release();
 
         if (result.rowCount === 0) {

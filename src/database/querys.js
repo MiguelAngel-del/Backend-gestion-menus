@@ -2,9 +2,16 @@
   export const querysProductos = {
     getProductos: "SELECT * FROM producto ORDER BY precio_global DESC;",
     getProducto: "SELECT * FROM producto WHERE id = $1",
-    postProducto: "INSERT INTO producto (nombre, precio_global) VALUES ($1, $2) RETURNING *",
-    putProducto: "UPDATE producto SET nombre = $1, precio_global = $2 WHERE id = $3 RETURNING *",
-    deleteProducto: "DELETE FROM producto WHERE id = $1"
+    postProducto: "INSERT INTO producto (nombre, precio_global, tipo) VALUES ($1, $2, $3) RETURNING *",
+    putProducto: "UPDATE producto SET nombre = $1, precio_global = $2, tipo = $3 WHERE id = $4 RETURNING *",
+    deleteProducto: "DELETE FROM producto WHERE id = $1",
+    searchProductos: `
+    SELECT *
+    FROM public.producto
+    WHERE nombre ILIKE '%' || $1 || '%'
+    ORDER BY nombre;
+
+  `,
   };
   
   export const querysMenus = {

@@ -11,6 +11,7 @@ import menuinstanciasRoutes from './routes/menuinstancias.routes.js';
 import bitacoraRoutes from './routes/bitacora.routes.js';
 import inventarioInstanciaRoutes from './routes/inventarioInstancia.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
+import reportesRoutes from './routes/reportes.routes.js';
 
 dotenv.config();
 const app = express();
@@ -34,5 +35,6 @@ app.use("/gestionmenus", menuinstanciasRoutes);
 app.use("/gestionmenus", bitacoraRoutes);
 app.use("/gestionmenus", inventarioInstanciaRoutes);
 app.use("/gestionmenus", usuarioRoutes);
+app.use("/gestionmenus", reportesRoutes);
 
 export default app;
