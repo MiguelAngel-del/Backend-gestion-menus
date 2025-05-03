@@ -16,42 +16,14 @@ import reportesRoutes from './routes/reportes.routes.js';
 dotenv.config();
 const app = express();
 
-// Construye la lista de orígenes permitidos
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_PROD_URL,
-  'http://localhost:3000' // <-- Asegúrate de que esté presente
-].filter(Boolean);
-// Durante el desarrollo, añade localhost:3000
-if (process.env.NODE_ENV !== 'production') {
-  allowedOrigins.push('http://localhost:3000');
-}
+// Settings
+app.set('port', config.port);
 
-console.log('➜  CORS allowed origins:', allowedOrigins);
-
-// Middleware CORS
+// Middlewares
 app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:3000', // Añade explícitamente tu origen local
-      // ... otros orígenes permitidos
-    ];
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Origen no permitido"));
-    }
-  },
-  credentials: true, // Acepta cookies/autorización
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: "http://localhost:3000", // Reemplaza con la URL de tu frontend
+    methods: ["GET", "POST", "PUT", "DELETE"]
 }));
-
-// Para manejar el preflight (OPTIONS) en todas las rutas
-app.options('*', cors());
-
-// Middlewares de body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
