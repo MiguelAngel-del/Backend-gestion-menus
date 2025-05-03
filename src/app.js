@@ -16,42 +16,53 @@ import reportesRoutes from './routes/reportes.routes.js';
 dotenv.config();
 const app = express();
 
-// Lista de orígenes permitidos (desarrollo y producción)
+// Construye la lista de orígenes permitidos
 const allowedOrigins = [
-  process.env.FRONTEND_URL,       // e.g. "http://localhost:3000"
-  process.env.FRONTEND_PROD_URL   // e.g. "https://tudominio.com"
-];
+  process.env.FRONTEND_URL,       // p.ej. "https://tuproduccion.com"
+  process.env.FRONTEND_PROD_URL   // p.ej. "https://tuproduccion.com"
+]
+  .filter(Boolean);
 
-// Middleware de CORS configurado dinámicamente
+// Durante el desarrollo, añade localhost:3000
+if (process.env.NODE_ENV !== 'production') {
+  allowedOrigins.push('http://localhost:3000');
+}
+
+console.log('➜  CORS allowed origins:', allowedOrigins);
+
+// Middleware CORS
 app.use(cors({
   origin: (origin, callback) => {
-    // Si la petición no tiene origen (p.e. desde Postman) o está en la lista, la dejamos pasar
+    // Si no hay origin (Postman, mobile clients, etc) o está en la lista, OK
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Origen no permitido por CORS: " + origin));
+      return callback(null, true);
     }
+    // Si no, error de CORS
+    callback(new Error(`Origen no permitido por CORS: ${origin}`));
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
   credentials: true
 }));
 
-// Middlewares para parsear JSON y formularios URL‑encoded
+// Para manejar el preflight (OPTIONS) en todas las rutas
+app.options('*', cors());
+
+// Middlewares de body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Puerto de la aplicación
-app.set('port', config.port);
+// Rutas bajo /gestionmenus
+app.use('/gestionmenus', productosRoutes);
+app.use('/gestionmenus', menusRoutes);
+app.use('/gestionmenus', menuproductosRoutes);
+app.use('/gestionmenus', menuinstanciasRoutes);
+app.use('/gestionmenus', bitacoraRoutes);
+app.use('/gestionmenus', inventarioInstanciaRoutes);
+app.use('/gestionmenus', usuarioRoutes);
+app.use('/gestionmenus', reportesRoutes);
 
-// Rutas de la API, todas bajo el prefijo /gestionmenus
-app.use("/gestionmenus", productosRoutes);
-app.use("/gestionmenus", menusRoutes);
-app.use("/gestionmenus", menuproductosRoutes);
-app.use("/gestionmenus", menuinstanciasRoutes);
-app.use("/gestionmenus", bitacoraRoutes);
-app.use("/gestionmenus", inventarioInstanciaRoutes);
-app.use("/gestionmenus", usuarioRoutes);
-app.use("/gestionmenus", reportesRoutes);
+// Puerto
+app.set('port', config.port);
 
 export default app;
