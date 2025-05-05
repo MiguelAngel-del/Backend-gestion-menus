@@ -11,22 +11,34 @@ import menuinstanciasRoutes from './routes/menuinstancias.routes.js';
 import bitacoraRoutes from './routes/bitacora.routes.js';
 import inventarioInstanciaRoutes from './routes/inventarioInstancia.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
-import reportesRoutes from './routes/reportes.routes.js';
 
 dotenv.config();
 const app = express();
 
-// Settings
-app.set('port', config.port);
+// Lista de orígenes permitidos (desarrollo y producción)
+const allowedOrigins = [
+    process.env.FRONTEND_URL,       // URL del frontend en desarrollo
+    process.env.FRONTEND_PROD_URL   // URL del frontend en producción
+];
+
+// Middleware de CORS configurado dinámicamente
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Origen no permitido por CORS"));
+        }
+    },
+    credentials: true
+}));
 
 // Middlewares
-app.use(cors({
-    origin: "http://localhost:3000", // Reemplaza con la URL de tu frontend
-    methods: ["GET", "POST", "PUT", "DELETE"]
-}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Settings
+app.set('port', config.port);
 // Rutas bajo /gestionmenus
 app.use('/gestionmenus', productosRoutes);
 app.use('/gestionmenus', menusRoutes);
