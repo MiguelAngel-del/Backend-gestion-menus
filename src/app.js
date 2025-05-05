@@ -16,30 +16,34 @@ import reportesRoutes from './routes/reportes.routes.js';
 dotenv.config();
 const app = express();
 
-// Lista de orígenes permitidos (desarrollo y producción)
+// Lee de .env o usa valores por defecto
+const DEV_FRONTEND  = process.env.FRONTEND_URL      || 'http://localhost:3000';
+const PROD_FRONTEND = process.env.FRONTEND_PROD_URL || 'https://frontend-gestion-menus.onrender.com';
+
+// Lista de orígenes permitidos
 const allowedOrigins = [
-    process.env.FRONTEND_URL,       // URL del frontend en desarrollo
-    process.env.FRONTEND_PROD_URL   // URL del frontend en producción
+  DEV_FRONTEND,
+  PROD_FRONTEND
 ];
 
-// Middleware de CORS configurado dinámicamente
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Origen no permitido por CORS"));
-        }
-    },
-    credentials: true
+  origin: (origin, callback) => {
+    // permitir peticiones sin origin (Postman, tests) o que estén en la whitelist
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+  },
+  credentials: true
 }));
 
-// Middlewares
+// Middlewares para parseo
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Settings
+// Puerto (se usará en src/index.js al arrancar)
 app.set('port', config.port);
+
 // Rutas bajo /gestionmenus
 app.use('/gestionmenus', productosRoutes);
 app.use('/gestionmenus', menusRoutes);
@@ -49,8 +53,5 @@ app.use('/gestionmenus', bitacoraRoutes);
 app.use('/gestionmenus', inventarioInstanciaRoutes);
 app.use('/gestionmenus', usuarioRoutes);
 app.use('/gestionmenus', reportesRoutes);
-
-// Puerto
-app.set('port', config.port);
 
 export default app;
