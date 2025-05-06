@@ -16,7 +16,7 @@ import reportesRoutes from './routes/reportes.routes.js';
 dotenv.config();
 const app = express();
 
-// Lee de .env o usa valores por defecto
+// URLs del frontend: asegúrate de NO poner “/” al final
 const DEV_FRONTEND  = process.env.FRONTEND_URL      || 'http://localhost:3000';
 const PROD_FRONTEND = process.env.FRONTEND_PROD_URL || 'https://frontend-gestion-menus.onrender.com';
 
@@ -26,25 +26,31 @@ const allowedOrigins = [
   PROD_FRONTEND
 ];
 
+// 1) CORS global con opciones extra para “preflight”
 app.use(cors({
   origin: (origin, callback) => {
-    // permitir peticiones sin origin (Postman, tests) o que estén en la whitelist
+    // Permitimos si no hay origin (Postman, tests) o si está en la whitelist
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error(`Origen no permitido por CORS: ${origin}`));
   },
-  credentials: true
+  credentials: true,
+  // forzamos que OPTIONS responda 200 en vez de 204 (por compatibilidad)
+  optionsSuccessStatus: 200
 }));
 
-// Middlewares para parseo
+// 2) Garantizamos que el preflight OPTIONS se capture en TODAS las rutas
+app.options('*', cors());
+
+// Middlewares de parseo
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Puerto (se usará en src/index.js al arrancar)
+// Configuramos el puerto
 app.set('port', config.port);
 
-// Rutas bajo /gestionmenus
+// Montamos las rutas bajo /gestionmenus
 app.use('/gestionmenus', productosRoutes);
 app.use('/gestionmenus', menusRoutes);
 app.use('/gestionmenus', menuproductosRoutes);
